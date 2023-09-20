@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  mosquitto-bt:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto-bt
+    ports:
+      - "1883:1883"
+    volumes:
+      - "./config/mosquitto:/mosquitto/config"
+      - "./.data/mosquitto:/mosquitto/data"
+    networks:
+      - bt-network
+
+  node-red-bt:
+    image: nodered/node-red:latest
+    container_name: node-red-bt
+    ports:
+      - "1880:1880"
+    volumes:
+      - "./.data/node-red:/data"
+    networks:
+      - bt-network
+
+networks:
+  bt-network:
+    driver: bridge
