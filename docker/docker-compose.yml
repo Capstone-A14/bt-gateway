@@ -22,6 +22,63 @@ services:
     networks:
       - bt-network
 
+  chronograf-bt:
+    container_name: chronograf-bt
+    image: chronograf:latest
+    ports:
+      - '127.0.0.1:8888:8888'
+    volumes:
+      - "./.data/chronograf:/var/lib/chronograf"
+    environment:
+      - INFLUXDB_URL=http://influxdb-bt:8086
+      - INFLUXDB_USERNAME=${INFLUXDB_USERNAME}
+      - INFLUXDB_PASSWORD=${INFLUXDB_PASSWORD}
+    networks:
+      - bt-network
+
+  influxdb-bt:
+    container_name: influxdb-bt
+    image: influxdb:latest
+    ports:
+      - '8086:8086'
+    volumes:
+      - "./.data/influxdb:/var/lib/influxdb2"
+    environment:
+      - INFLUXDB_DB=db0
+      - INFLUXDB_ADMIN_USER=${INFLUXDB_USERNAME}
+      - INFLUXDB_ADMIN_PASSWORD=${INFLUXDB_PASSWORD}
+    networks:
+      - bt-network
+
+  mongodb-bt:
+    container_name: mongodb-bt
+    image: mongo:6.0
+    volumes:
+      - ./.data/mongodb:/data/db
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+      - MONGO_INITDB_DATABASE=admin
+    networks:
+      - bt-network
+
+  grafana-bt:
+    container_name: grafana-bt
+    image: grafana/grafana:latest
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./.data/grafana:/var/lib/grafana
+      - ./.data/grafana-provisioning/:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    networks:
+      - bt-network
+
+
 networks:
   bt-network:
     driver: bridge
