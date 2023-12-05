@@ -50,19 +50,19 @@ services:
     networks:
       - bt-network
 
-  mongodb-bt:
-    container_name: mongodb-bt
-    image: mongo:6.0
-    volumes:
-      - ./.data/mongodb:/data/db
-    ports:
-      - "27017:27017"
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin
-      - MONGO_INITDB_DATABASE=admin
-    networks:
-      - bt-network
+  # mongodb-bt:
+  #   container_name: mongodb-bt
+  #   image: mongo:6.0
+  #   volumes:
+  #     - ./.data/mongodb:/data/db
+  #   ports:
+  #     - "27017:27017"
+  #   environment:
+  #     - MONGO_INITDB_ROOT_USERNAME=admin
+  #     - MONGO_INITDB_ROOT_PASSWORD=admin
+  #     - MONGO_INITDB_DATABASE=admin
+  #   networks:
+  #     - bt-network
 
   grafana-bt:
     container_name: grafana-bt
@@ -72,9 +72,11 @@ services:
     volumes:
       - ./.data/grafana:/var/lib/grafana
       - ./.data/grafana-provisioning/:/etc/grafana/provisioning
+      - ./.data/grafana.ini:/etc/grafana/grafana.ini:ro
     environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     networks:
       - bt-network
 

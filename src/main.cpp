@@ -16,24 +16,22 @@
 EspMQTTClient mqttClient(
         "UGM SECURE 2",
         "127127127",
-        "192.168.95.102",
+        "192.168.91.102",
         "m5stack",
         1883
 );
 
 
 void onConnectionEstablished(){
-    mqttClient.subscribe("/m5stack/sub", [](const String & payload) {
-        Serial.println(payload);
-    });
-    mqttClient.publish("/m5stack/pub", "Hello World"); // You can activate the retain flag by setting the third parameter to true
+    mqttClient.publish("/time/dev0/pat0", "100");
+    mqttClient.publish("/time/dev1/pat1", "101");
 }
 
 void setup() {
     Serial.begin(115200);
     M5.begin();
 
-    mqttClient.setMaxPacketSize(1024);
+    mqttClient.setMaxPacketSize(1024*5);
     mqttClient.enableDebuggingMessages(); // Enable debugging messages sent to serial output
 
     M5.Lcd.printf("START");
@@ -48,6 +46,7 @@ int ecgBuffer[ECG_BUFFER];
 String payload;
 int buffItr = 0;
 int mockItr = 0;
+int tempItr = 0;
 
 void SerializeJson(int input[ECG_BUFFER], String &output){
     StaticJsonDocument<24576> doc;
@@ -59,10 +58,12 @@ void SerializeJson(int input[ECG_BUFFER], String &output){
 }
 
 
+
+
 void loop() {
     mqttClient.loop();
     if(mqttClient.isConnected()){
-        ecgBuffer[buffItr] = ecgMock[mockItr];
+        ecgBuffer[buffItr] = ecgMock[mockItr];// membaca detak "jantung"
         Serial.printf("adding %d on buffer at %d itteration\n",ecgBuffer[buffItr], buffItr);
         buffItr++;mockItr++;
         if(mockItr==116){
@@ -72,8 +73,15 @@ void loop() {
             SerializeJson(ecgBuffer, payload);
             Serial.println("paload: ");
             Serial.println(payload);
-            mqttClient.publish("/m5stack/pub", payload); //publish the buffer
+            if(tempItr%2==0){
+                mqttClient.publish("/ecg/lead1", payload); //publish the buffer
+//                mqttClient.publish("/imu/dev0/pat0", payload);
+            } else{
+                mqttClient.publish("/ecg/lead2", payload); //publish the buffer
+//                mqttClient.publish("/imu/dev0/pat0", payload);
+            }
             payload.clear();
+            tempItr++;
             buffItr=0;
         }
         delay(1000/samplingFreq);
